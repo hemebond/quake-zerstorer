@@ -30,10 +30,6 @@ void() Trog_idlesound;
 void() TrogAttackFinished;
 
 
-// ** Mutual exclusion for trog magic attack so that we
-//    don't overflow space!
-var float TMAGIC_DONE = 1;
-
 
 void()	trog_stand1	=[	$float1,		trog_stand2	] {ai_stand(); Trog_idlesound(); setorigin(self, self.origin - '0 0 2'); };
 void()	trog_stand2	=[	$float2,		trog_stand3	] {ai_stand(); setorigin(self, self.origin - '0 0 2'); };
@@ -271,8 +267,6 @@ TrogAttackFinished
 =================
 */
 void TrogAttackFinished() {
-	dprint("TrogAttackFinished()\n");
-
 	if (enemy_range >= RANGE_MID || !enemy_vis)
 	{
 		self.attack_state = AS_STRAIGHT;
@@ -288,10 +282,6 @@ void TrogAttackFinished() {
 //*******************************
 
 void DoCircles() {
-	dprint("DoCircles()\n");
-
-	eprint(self);
-
 	vector startpos, drag, dragto;
 
 	if (self.dmg == 1) {
@@ -331,8 +321,6 @@ void DoCircles() {
 
 
 void DoMagicExplode() {
-	dprint("DoMagicExplode()\n");
-
 	vector newo;
 	float x, y, z;
 	entity sprt;
@@ -376,8 +364,6 @@ void DoMagicExplode() {
 
 
 void TrogWarpMagic() {
-	dprint("TrogWarpMagic()\n");
-
 	sound (self, CHAN_AUTO, "trog/bigboom.wav", 1, ATTN_NORM);
 	setmodel(self, "progs/warp2.mdl");
 	setorigin(self, self.origin);
@@ -391,14 +377,15 @@ void TrogWarpMagic() {
 		self.enemy.velocity_x = (random() * 400) - 200;
 		self.enemy.velocity_y = (random() * 400) - 200;
 	}
-	trog_magic1 ();
-	TMAGIC_DONE = 1;
+	trog_magic1();
 };
 
 
 
 void StartTrogMagic() {
-	dprint("StartTrogMagic()\n");
+	//
+	// Summons a circle of particles, suspends the player in the air, and then explodes
+	//
 
 	entity magic_circle, tboom;
 
@@ -415,10 +402,10 @@ void StartTrogMagic() {
 	magic_circle.enemy = self.enemy;
 	sound(magic_circle, CHAN_WEAPON, "trog/charge.wav", 1, ATTN_NORM);
 	magic_circle.nextthink = time + 0.01;
-	eprint(magic_circle);
 
 
 	tboom = spawn();
+	tboom.classname = "troglodyte_magic";
 	tboom.origin = self.enemy.origin + '0 0 24';
 	//tboom.skin = 1;
 	tboom.enemy = self.enemy;
@@ -433,8 +420,6 @@ void StartTrogMagic() {
 
 
 void TrogBallThink() {
-	dprint("TrogBallThink()\n");
-
 	self.frame = self.frame + 1;
 	if (self.frame == 6)
 	    self.frame = 0;
@@ -513,17 +498,24 @@ void() Trog_FireBall =
 	setorigin (missile, missile.origin);
 };
 
-void() Trog_Missile =
-{
-	if (random() < 0.25 || !(TMAGIC_DONE))
-		return;
+void Trog_Missile() {
+	entity existing_magic_attack;
 
-	if (random() < 0.6 || !(self.enemy.flags & FL_ONGROUND))
+	if (random() < 0.25) {
+		return;
+	}
+
+	if (random() < 0.6 || !(self.enemy.flags & FL_ONGROUND)) {
 		trog_fast1();
-	else
-	{
-		TMAGIC_DONE = 0;
-		trog_sboom1();
+	}
+	else {
+		// ** Mutual exclusion for trog magic attack so that we
+		//    don't overflow space!
+		existing_magic_attack = find(world, classname, "troglodyte_magic");
+
+		if (!existing_magic_attack) {
+			trog_sboom1();
+		}
 	}
 };
 
