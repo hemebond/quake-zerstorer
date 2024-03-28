@@ -93,8 +93,7 @@ void()	actor_pain4 =	[ $pain4,	actor_pain5	] {};
 void()	actor_pain5 =	[ $pain5,	actor_pain6	] {};
 void()	actor_pain6 =	[ $pain6,	actor_run	] {if (self.count == 1 && self.enemy != world) ai_run(10);};
 
-void() actor_pain =
-{
+void actor_pain(entity attacker, float damage) {
 local float 	r;
 
 	if (self.pain_finished > time)

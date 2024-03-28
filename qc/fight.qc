@@ -293,10 +293,10 @@ Returns FALSE if movement should continue
 */
 float() ShamCheckAttack =
 {
-	local vector	spot1, spot2;	
-	local entity	targ;
-	local float		chance;
-	local float		enemy_yaw;
+	vector spot1, spot2;
+	entity targ;
+	float chance;
+	// float enemy_yaw;  comment out to fix warning
 
 	if (enemy_range == RANGE_MELEE)
 	{
