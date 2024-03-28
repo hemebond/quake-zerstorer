@@ -3,7 +3,7 @@
 void () W_WeaponFrame;
 void() W_SetCurrentAmmo;
 void() CheatCommand;
-void() player_pain;
+void(entity attacker, float damage) player_pain;
 void() player_stand1;
 void() Script_play;	//dhm - prototype
 void() go_back;		//dhm - prototype
@@ -915,50 +915,53 @@ Called every frame before physics are run
 ================
 */
 
-void() PlayerPreThink =
-{
-	local	float	mspeed, aspeed;
-	local	float	r;
+void PlayerPreThink() {
+	local float mspeed, aspeed;
+	local float r;
 	local entity goback;
 
-	if (intermission_running)
-	{
-		IntermissionThink ();	// otherwise a button could be missed between
+	if (intermission_running) {
+		IntermissionThink();	// otherwise a button could be missed between
 		return;					// the think tics
 	}
 
-	if (self.view_ofs == '0 0 0')
-	{
-  /* --------------------------------------------
-	If we are in camera mode, play the script.
-     -------------------------------------------- */
-		if (self.impulse && (world.model != "maps/zerend.bsp") && (world.model != "maps/zer1m2.bsp"))
-		 if (self.script_count != 1000000)
-		 {
-			self.script_count = 1000000;
-		 // If cut-scene has ended, and user tries to exit, don't
-		 // spawn a second go_back control entity.
-			goback = find(world, classname, "going_back");
-			if(!goback)
-			{
-			   sprint(self, "...\n");
-			   goback = spawn();
-			   goback.nextthink = time + 1.5;
-			   goback.think = go_back;
+	if (self.view_ofs == '0 0 0') {
+		// --------------------------------------------
+		// If we are in camera mode, play the script.
+		// --------------------------------------------
+		if (
+			self.impulse &&
+			(world.model != "maps/zerend.bsp") &&
+			(world.model != "maps/zer1m2.bsp")
+		) {
+			if (self.script_count != 1000000) {
+				self.script_count = 1000000;
+				// If cut-scene has ended, and user tries to exit, don't
+				// spawn a second go_back control entity.
+				goback = find(world, classname, "going_back");
+				if(!goback) {
+					sprint(self, "...\n");
+					goback = spawn();
+					goback.nextthink = time + 1.5;
+					goback.think = go_back;
+				}
 			}
-		 }
+		}
 		
-		if (self.classname == "camera")
-			look_ahead ();
-		if (self.script_count < self.script_delay && self.script_time < time)
-			Script_play ();
+		if (self.classname == "camera") {
+			look_ahead();
+		}
+
+		if (self.script_count < self.script_delay && self.script_time < time) {
+			Script_play();
+		}
 
 		return;		// intermission or finale
 	}
 
 	//makevectors (self.v_angle);		// is this still used
-	CheckRules ();
-	WaterMove ();
+	CheckRules();
+	WaterMove();
 
 	if (self.waterlevel == 2)
 		CheckWaterJump ();
@@ -972,30 +975,28 @@ void() PlayerPreThink =
 	if (self.deadflag == DEAD_DYING)
 		return;	// dying, so do nothing
 
-	if (self.button2)
-	{
+	if (self.button2) {
 		PlayerJump ();
 	}
-	else
+	else {
 		self.flags = self.flags | FL_JUMPRELEASED;
+	}
 
-// teleporters can force a non-moving pause time	
-	if (time < self.pausetime)
-	{
+	// teleporters can force a non-moving pause time
+	if (time < self.pausetime) {
 		self.velocity = '0 0 0';
-		if (time < self.stunned)
+		if (time < self.stunned) {
 			self.button0 = 0;
+		}
 	}
 
-	if(self.currentammo == 0)
-	{
-	 if(self.weapon != IT_AXE && self.weapon != IT_CHAINSAW && self.weapon != IT2_SRE)
-	 {
-		self.weapon = W_BestWeapon ();
-		W_SetCurrentAmmo ();
-	 }
+	if(self.currentammo == 0) {
+		if(self.weapon != IT_AXE && self.weapon != IT_CHAINSAW && self.weapon != IT2_SRE) {
+			self.weapon = W_BestWeapon ();
+			W_SetCurrentAmmo ();
+		}
 	}
-};
+}
 	
 /*
 ================

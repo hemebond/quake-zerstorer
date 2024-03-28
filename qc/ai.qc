@@ -192,19 +192,18 @@ infront
 returns 1 if the entity is in front (in sight) of self
 =============
 */
-float(entity targ) infront =
-{
-	local vector	vec;
-	local float		dot;
+float infront(entity targ) {
+	vector vec;
+	float dot;
 	
-	makevectors (self.angles);
-	vec = normalize (targ.origin - self.origin);
+	makevectors(self.angles);
+	vec = normalize(targ.origin - self.origin);
 	dot = vec * v_forward;
 	
-	if ( dot > 0.3)
-	{
+	if (dot > 0.3) {
 		return TRUE;
 	}
+
 	return FALSE;
 };
 
@@ -381,7 +380,7 @@ float() FindTarget =
 	{
 		client = sight_entity;
 		if (client.enemy == self.enemy)
-			return;
+			return FALSE;
 	}
 	else
 	{
@@ -601,7 +600,7 @@ float()	DogCheckAttack;
 float() CheckAnyAttack =
 {
 	if (!enemy_vis)
-		return;
+		return FALSE;
 	if (self.classname == "monster_army")
 		return SoldierCheckAttack ();
 	if (self.classname == "monster_ogre")

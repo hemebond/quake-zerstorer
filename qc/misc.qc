@@ -209,8 +209,9 @@ void() misc_fireball =
 	
       self.classname = "fireball";
       self.think = fire_fly;
-      if (!self.speed)
-              self.speed == 1000;
+      if (!self.speed) {
+      	self.speed = 1000;
+      }
 };
 
 void() fire_use =
@@ -959,8 +960,8 @@ void() func_illusionary =
 	self.angles = '0 0 0';
 	self.movetype = MOVETYPE_NONE;
 	self.solid = SOLID_NOT;
-	setmodel (self, self.model);
-	makestatic ();
+	setmodel(self, self.model);
+	makestatic(self);
 };
 
 /*QUAKED func_episodegate (0 .5 .8) ? E1 E2 E3 E4

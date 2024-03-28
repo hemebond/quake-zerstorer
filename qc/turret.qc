@@ -15,10 +15,7 @@ void() turret_scan;
 void(vector org, vector dest) LaunchLaser;
 void(string gibname, float dm, vector ddir) ThrowRubble;
 
-void(vector org, vector vec) T_LaunchLaser =
-{
-	local	vector	vec;
-		
+void T_LaunchLaser(vector org, vector vec) {
 	sound (self, CHAN_WEAPON, "enforcer/enfire.wav", 1, ATTN_NORM);
 	self.effects = self.effects | EF_MUZZLEFLASH;
 	vec = normalize(vec);
@@ -120,14 +117,12 @@ void() turret_scan =
 	self.nextthink = time + 0.1;
 };
 
-void() turret_go =
-{
+void turret_go() {
 	self.think = turret_scan;
 	self.nextthink = time + 0.1;
 };
 
-void() turret_die =
-{
+void turret_die() {
 	WriteByte (MSG_BROADCAST, SVC_TEMPENTITY);
 	WriteByte (MSG_BROADCAST, TE_EXPLOSION);
 	WriteCoord (MSG_BROADCAST, self.origin_x);
@@ -147,8 +142,7 @@ void() turret_die =
 	remove(self);
 };
 
-void() turret_use =
-{
+void turret_use() {
 	self.takedamage = DAMAGE_AIM;
 	self.solid = SOLID_BBOX;
 	self.movetype = MOVETYPE_STEP;

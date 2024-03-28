@@ -27,12 +27,12 @@ $frame death10 death11 death12 death13 death14 death15 death16 death17
 void() Trog_FireBall;
 void() StartTrogMagic;
 void() Trog_idlesound;
-float() TrogAttackFinished;
+void() TrogAttackFinished;
 
 
 // ** Mutual exclusion for trog magic attack so that we
 //    don't overflow space!
-float TMAGIC_DONE = 1;
+var float TMAGIC_DONE = 1;
 
 
 void()	trog_stand1	=[	$float1,		trog_stand2	] {ai_stand(); Trog_idlesound(); setorigin(self, self.origin - '0 0 2'); };
@@ -43,8 +43,10 @@ void()	trog_stand5	=[	$float5,		trog_stand6	] {ai_stand(); setorigin(self, self.
 void()	trog_stand6	=[	$float6,		trog_stand7	] {ai_stand(); setorigin(self, self.origin + '0 0 2'); };
 void()	trog_stand7	=[	$float7,		trog_stand1	] {ai_stand();};
 
-void()	trog_walk1	=[	$float1,		trog_walk2	] {ai_walk(8);
-Trog_idlesound(); /*setorigin(self, self.origin + '0 0 2');*/ };
+void()	trog_walk1	=[	$float1,		trog_walk2	] {
+	ai_walk(8);
+	Trog_idlesound(); /*setorigin(self, self.origin + '0 0 2');*/
+};
 void()	trog_walk2	=[	$float2,		trog_walk3	] {ai_walk(8); /*setorigin(self, self.origin + '0 0 2');*/ };
 void()	trog_walk3	=[	$float3,		trog_walk4	] {ai_walk(8); /*setorigin(self, self.origin + '0 0 2');*/ };
 void()	trog_walk4	=[	$float4,		trog_walk5	] {ai_walk(8); /*setorigin(self, self.origin - '0 0 2');*/ };
@@ -76,9 +78,8 @@ float(vector tspot) Checkspot =
 	return TRUE;
 };
 
-void() tele_attack =
-{
-local vector	tspot, tline;
+void tele_attack() {
+	vector	tspot, tline;
 
 	//dprint("tele_attack!\n");
 	tline = self.enemy.origin - self.origin;
@@ -106,9 +107,8 @@ local vector	tspot, tline;
 };
 
 
-void() check_tele =
-{
-local entity head;
+void check_tele() {
+	entity head;
 
 	if (!self.enemy)
 		return;
@@ -131,8 +131,7 @@ local entity head;
 };
 
 
-void()	trog_side1	=[	$float1,		trog_side2	] {ai_run(8);
-Trog_idlesound(); check_tele(); };
+void()	trog_side1	=[	$float1,		trog_side2	] {ai_run(8); Trog_idlesound(); check_tele();};
 void()	trog_side2	=[	$float2,		trog_side3	] {ai_run(8); /*setorigin(self, self.origin - '0 0 2');*/ };
 void()	trog_side3	=[	$float3,		trog_side4	] {ai_run(8); /*setorigin(self, self.origin - '0 0 2');*/ check_tele(); };
 void()	trog_side4	=[	$float4,		trog_side5	] {ai_run(8); /*setorigin(self, self.origin - '0 0 2');*/ };
@@ -140,8 +139,7 @@ void()	trog_side5	=[	$float5,		trog_side6	] {ai_run(8); /*setorigin(self, self.o
 void()	trog_side6	=[	$float6,		trog_side7	] {ai_run(8); /*setorigin(self, self.origin + '0 0 2');*/ };
 void()	trog_side7	=[	$float7,		trog_side1	] {ai_run(8); /*setorigin(self, self.origin + '0 0 2');*/ check_tele(); };
 
-void()	trog_run1	=[	$float1,		trog_run2	] {ai_run(16);
-Trog_idlesound(); /*setorigin(self, self.origin - '0 0 2');*/ check_tele(); };
+void()	trog_run1	=[	$float1,		trog_run2	] {ai_run(16); Trog_idlesound(); /*setorigin(self, self.origin - '0 0 2');*/ check_tele(); };
 void()	trog_run2	=[	$float2,		trog_run3	] {ai_run(16); /*setorigin(self, self.origin - '0 0 2');*/ };
 void()	trog_run3	=[	$float3,		trog_run4	] {ai_run(16); /*setorigin(self, self.origin - '0 0 2');*/ check_tele(); };
 void()	trog_run4	=[	$float4,		trog_run5	] {ai_run(16); /*setorigin(self, self.origin + '0 0 2');*/ };
@@ -194,22 +192,22 @@ if (random() < 0.5)
 else
    sound (self, CHAN_VOICE, "trog/tdeath2.wav", 1, ATTN_NORM);
 };
-void()	trog_death2	=[	$death2,		trog_death3	] {};
-void()	trog_death3	=[	$death3,		trog_death4	]{self.solid = SOLID_NOT;};
-void()	trog_death4	=[	$death4,		trog_death5	] {};
-void()	trog_death5	=[	$death5,		trog_death6	] {};
-void()	trog_death6	=[	$death6,		trog_death7	] {};
-void()	trog_death7	=[	$death7,		trog_death8	] {};
-void()	trog_death8	=[	$death8,		trog_death9	] {};
-void()	trog_death9	=[	$death9,		trog_death10] {};
-void()	trog_death10=[	$death10,		trog_death11] {};
-void()	trog_death11=[	$death11,		trog_death12] {};
-void()	trog_death12=[	$death12,		trog_death13] {};
-void()	trog_death13=[	$death13,		trog_death14] {};
-void()	trog_death14=[	$death14,		trog_death15] {};
-void()	trog_death15=[	$death15,		trog_death16] {};
-void()	trog_death16=[	$death16,		trog_death17] {};
-void()	trog_death17=[	$death17,		trog_death17] {};
+void() trog_death2  = [ $death2,  trog_death3  ] {};
+void() trog_death3  = [ $death3,  trog_death4  ] {self.solid = SOLID_NOT;};
+void() trog_death4  = [ $death4,  trog_death5  ] {};
+void() trog_death5  = [ $death5,  trog_death6  ] {};
+void() trog_death6  = [ $death6,  trog_death7  ] {};
+void() trog_death7  = [ $death7,  trog_death8  ] {};
+void() trog_death8  = [ $death8,  trog_death9  ] {};
+void() trog_death9  = [ $death9,  trog_death10 ] {};
+void() trog_death10 = [ $death10, trog_death11 ] {};
+void() trog_death11 = [ $death11, trog_death12 ] {};
+void() trog_death12 = [ $death12, trog_death13 ] {};
+void() trog_death13 = [ $death13, trog_death14 ] {};
+void() trog_death14 = [ $death14, trog_death15 ] {};
+void() trog_death15 = [ $death15, trog_death16 ] {};
+void() trog_death16 = [ $death16, trog_death17 ] {};
+void() trog_death17 = [ $death17, trog_death17 ] {};
 
 // ------------------------------
 void()	trog_magic1	=[	0,		trog_magic2	] {self.effects = self.effects | EF_MUZZLEFLASH;};
@@ -272,8 +270,9 @@ void(entity attacker, float damage) Trog_Pain =
 TrogAttackFinished
 =================
 */
-float()	TrogAttackFinished =
-{
+void TrogAttackFinished() {
+	dprint("TrogAttackFinished()\n");
+
 	if (enemy_range >= RANGE_MID || !enemy_vis)
 	{
 		self.attack_state = AS_STRAIGHT;
@@ -288,32 +287,37 @@ float()	TrogAttackFinished =
 
 //*******************************
 
-void() DoCircles =
-{
-local vector startpos, drag, dragto;
+void DoCircles() {
+	dprint("DoCircles()\n");
 
-	if (self.dmg == 1)
-	{
+	eprint(self);
+
+	vector startpos, drag, dragto;
+
+	if (self.dmg == 1) {
 		self.origin = self.origin + '0 0 8';
 		startpos = self.origin + '0 0 16';
 	}
-	else
-	{
+	else {
 		self.origin = self.origin - '0 0 8';
 		startpos = self.origin - '0 0 16';
 	}
+
 	DrawCircleXY(self.origin, 84 - (self.count*3), 105);
 	DrawCircleXY(startpos, 64 - (self.count*3), 232);
+
 	self.count = self.count - self.dmg;
-	if (self.count == 6)
-	{
+
+	if (self.count > 5) {
 		remove(self);
 		return;
 	}
-	if (self.count == 0)
+
+	if (self.count == 0) {
 		self.dmg = -1;
-	if (vlen(self.enemy.origin - self.origin) <= 250)
-	{
+	}
+
+	if (vlen(self.enemy.origin - self.origin) <= 250) {
 		dragto = self.origin;
 		dragto_z = self.enemy.origin_z;
 		drag = normalize (dragto - self.enemy.origin);
@@ -324,11 +328,14 @@ local vector startpos, drag, dragto;
 	self.nextthink = time + 0.12;
 };
 
-void() DoMagicExplode =
-{
-	local	vector	newo;
-	local	float	x, y, z;
-	local entity sprt;
+
+
+void DoMagicExplode() {
+	dprint("DoMagicExplode()\n");
+
+	vector newo;
+	float x, y, z;
+	entity sprt;
 
 	x = (random() * 128) - 64;
 	y = (random() * 128) - 64;
@@ -366,8 +373,11 @@ void() DoMagicExplode =
 	s_explode1 ();
 };
 
-void() TrogWarpMagic =
-{
+
+
+void TrogWarpMagic() {
+	dprint("TrogWarpMagic()\n");
+
 	sound (self, CHAN_AUTO, "trog/bigboom.wav", 1, ATTN_NORM);
 	setmodel(self, "progs/warp2.mdl");
 	setorigin(self, self.origin);
@@ -385,39 +395,46 @@ void() TrogWarpMagic =
 	TMAGIC_DONE = 1;
 };
 
-void() StartTrogMagic =
-{
-local entity  Mcircle, Tboom;
+
+
+void StartTrogMagic() {
+	dprint("StartTrogMagic()\n");
+
+	entity magic_circle, tboom;
 
 	//freeze player to scare him.
 	//self.enemy.pausetime = time + 0.25;
 
-	Mcircle = spawn();
-	Mcircle.origin = self.enemy.origin - '0 0 12';
-	setorigin(Mcircle, Mcircle.origin);
-	Mcircle.count = 5;
-	Mcircle.dmg = 1;
-	Mcircle.think = DoCircles;
-	Mcircle.enemy = self.enemy;
-	sound (Mcircle, CHAN_WEAPON, "trog/charge.wav", 1, ATTN_NORM);
-	Mcircle.nextthink = time + 0.01;
+	magic_circle = spawn();
+	magic_circle.classname = "troglodyte_magic";
+	magic_circle.origin = self.enemy.origin - '0 0 12';
+	setorigin(magic_circle, magic_circle.origin);
+	magic_circle.dmg = 1;
+	magic_circle.count = 5;
+	magic_circle.think = DoCircles;
+	magic_circle.enemy = self.enemy;
+	sound(magic_circle, CHAN_WEAPON, "trog/charge.wav", 1, ATTN_NORM);
+	magic_circle.nextthink = time + 0.01;
+	eprint(magic_circle);
 
-	Tboom = spawn();
-	Tboom.origin = self.enemy.origin + '0 0 24';
-	//Tboom.skin = 1;
-	Tboom.enemy = self.enemy;
-	Tboom.solid = SOLID_NOT;
-	Tboom.movetype = MOVETYPE_NONE;
-	Tboom.think = TrogWarpMagic;
-	Tboom.owner = self;
-	Tboom.wait = 6;
-	Tboom.nextthink = time + 1.1;
-};
 
-//*******************************
+	tboom = spawn();
+	tboom.origin = self.enemy.origin + '0 0 24';
+	//tboom.skin = 1;
+	tboom.enemy = self.enemy;
+	tboom.solid = SOLID_NOT;
+	tboom.movetype = MOVETYPE_NONE;
+	tboom.think = TrogWarpMagic;
+	tboom.owner = self;
+	tboom.wait = 6;
+	tboom.nextthink = time + 1.1;
+}
 
-void() TrogBallThink =
-{
+
+
+void TrogBallThink() {
+	dprint("TrogBallThink()\n");
+
 	self.frame = self.frame + 1;
 	if (self.frame == 6)
 	    self.frame = 0;

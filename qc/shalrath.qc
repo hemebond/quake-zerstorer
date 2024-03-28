@@ -21,14 +21,16 @@ $frame death1 death2 death3 death4 death5 death6 death7
 $frame	walk1 walk2 walk3 walk4 walk5 walk6 walk7 walk8 walk9 walk10
 $frame	walk11 walk12
 
-void() shalrath_pain;
+void shalrath_pain(entity attacker, float damage);
 void() ShalMissile;
 void() shal_stand     =[      $walk1,       shal_stand    ] {ai_stand();};
 
 void() shal_walk1     =[      $walk2,       shal_walk2    ] {
-if (random() < 0.2)
-	sound (self, CHAN_VOICE, "shalrath/idle.wav", 1, ATTN_IDLE);
-ai_walk(6);};
+	if (random() < 0.2) {
+		sound (self, CHAN_VOICE, "shalrath/idle.wav", 1, ATTN_IDLE);
+	}
+	ai_walk(6);
+};
 void() shal_walk2     =[      $walk3,       shal_walk3    ] {ai_walk(4);};
 void() shal_walk3     =[      $walk4,       shal_walk4    ] {ai_walk(0);};
 void() shal_walk4     =[      $walk5,       shal_walk5    ] {ai_walk(0);};
@@ -87,18 +89,17 @@ void() shal_death6      =[      $death6,        shal_death7     ] {};
 void() shal_death7      =[      $death7,        shal_death7    ] {};
 
 
-void() shalrath_pain =
-{
-	if (self.pain_finished > time)
+void shalrath_pain(entity attacker, float damage) {
+	if (self.pain_finished > time) {
 		return;
+	}
 
-	sound (self, CHAN_VOICE, "shalrath/pain.wav", 1, ATTN_NORM);
+	sound(self, CHAN_VOICE, "shalrath/pain.wav", 1, ATTN_NORM);
 	shal_pain1();
 	self.pain_finished = time + 3;
-};
+}
 
-void() shalrath_die =
-{
+void shalrath_die() {
 // check for gib
 	if (self.health < -90)
 	{
