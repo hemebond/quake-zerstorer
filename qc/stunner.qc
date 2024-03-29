@@ -3,20 +3,7 @@ $origin 0 0 24
 $base base
 $skin skin
 
-/*
 
-ftp.killme.com
-killme
-xoj4bcq12
-
-www.killme.com/cgi-bin/cgiwrap/killme/wwwboard.pl
-bongo
-thekook
-
-Killme's phone number.  (Brandon)
-<kandyman>	913-841-1693 home 
-<kandyman>	(913)841-4294 battlezone (confirmed)
-*/
 
 void() StunAnimate  =[	0,	StunAnimate2	] {};
 void() StunAnimate2 =[	1,	StunAnimate3	] {};
