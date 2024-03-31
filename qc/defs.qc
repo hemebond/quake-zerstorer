@@ -610,7 +610,7 @@ void() break						= #6;
 float() random						= #7;		// returns 0 - 1
 void(entity e, float chan, string samp, float vol, float atten) sound = #8;
 vector(vector v) normalize			= #9;
-void(string e) error				= #10;
+void error(string e)				= #10;
 void(string e) objerror				= #11;
 float(vector v) vlen				= #12;
 float(vector v) vectoyaw			= #13;
@@ -622,7 +622,7 @@ void(entity e) remove				= #15;
 // An entity will also be ignored for testing if forent == test,
 // forent->owner == test, or test->owner == forent
 // a forent of world is ignored
-void(vector v1, vector v2, float nomonsters, entity forent) traceline = #16;	
+void traceline(vector v1, vector v2, float nomonsters, entity forent) = #16;
 
 entity() checkclient				= #17;	// returns a client to look for
 entity(entity start, .string fld, string match) find = #18;
@@ -635,7 +635,7 @@ void(entity client, string s) sprint = #24;
 void(string s) dprint				= #25;
 string(float f) ftos				= #26;
 string(vector v) vtos				= #27;
-void() coredump						= #28;		// prints all edicts
+void coredump()						= #28;		// prints all edicts
 void() traceon						= #29;		// turns statment trace on
 void() traceoff						= #30;
 void(entity e) eprint				= #31;		// prints an entire edict

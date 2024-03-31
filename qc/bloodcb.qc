@@ -8,28 +8,43 @@
 /* |  hungry and start to feed off of your blood.		   | */
 /* ------------------------------------------------------------- */
 
+// .state
 float BLOOD_WAIT = -1;
 float BLOOD_ASLEEP = 0;
 float BLOOD_AWAKE = 1;
 
+// .height
 float CUBE_RANGE = 400;			//How far the cube can 'see' enemies
+
+// .dmg
 float CUBE_DAMAGE = 20;			//The amount of damage of one zap
-float CUBE_GOAWAYTIME = 30;		//Initial time limit for cube life
+
+float CUBE_GOAWAYTIME_DM = 30;		//Initial time limit for cube life
+float CUBE_GOAWAYTIME = 40;		//Initial time limit for cube life
+
 float CUBE_RESPAWNTIME = 300;		//Time until cube respawns
+
+// .delay
 float CUBE_ATTACKDELAY = 0.1;		//How quickly cube attacks again
+float CUBE_ATTACKDELAY_DM = 0.25;
 
 // * prototypes *
 void() StartCube;
 void() Cube_die;
 void() Cube_control;
 
+
+
+float bloodcube_is_awake(entity cube) {
+	return cube.state == BLOOD_AWAKE;
+}
+
 /* ----------------------------------------------------- */
 /*   CubeAttack - A new attack style for the BloodCube.  */
 /* ----------------------------------------------------- */
-void(vector start, vector end, float color1, float color2, float pdensity) Particle_Beam =
-{
-local vector	spray, next;
-local float		dist, loop, clr;
+void Particle_Beam(vector start, vector end, float color1, float color2, float pdensity) {
+	vector spray, next;
+	float dist, loop, clr;
 
 	clr = color1;
 	spray = start - end;
@@ -37,99 +52,90 @@ local float		dist, loop, clr;
 	loop = dist / 24;
 	spray = normalize(spray);
 	next = spray * 24;
-	while(loop > 0)
-	{
+
+	while (loop > 0) {
 		particle (end, spray, clr, pdensity);
 		end = end + next;
-		loop = loop - 1;
-		if (clr == color1)
-			clr = color2;
-		else
-			clr = color1;
+		loop--;
+		clr = clr == color1 ? color2 : color1;
 	}
-};
+}
 
-void(vector start, vector end, entity attacker, entity targ) CubeAttack =
-{
+void CubeAttack(vector start, vector end, entity attacker, entity targ) {
 	Particle_Beam(start, end, 73, 225, 40);
 
-	if(deathmatch)
-	{
-	   if (targ.health < CUBE_DAMAGE)
-		T_Damage (targ, attacker, attacker, CUBE_DAMAGE*5);
-	   else
-		T_Damage (targ, attacker, attacker, CUBE_DAMAGE);
+	float extra_damage_threshold = deathmatch ? self.dmg : self.dmg + 10;
+
+	if (targ.health < extra_damage_threshold) {
+		T_Damage(targ, attacker, attacker, self.dmg * 5);
 	}
-	else
-	{
-	   if (targ.health < (CUBE_DAMAGE + 10))
-		T_Damage (targ, attacker, attacker.owner, CUBE_DAMAGE*5);
-	   else
-		T_Damage (targ, attacker, attacker.owner, CUBE_DAMAGE);
+	else {
+		T_Damage(targ, attacker, attacker, self.dmg);
 	}
 		
-	if (self.t_width < time)
-	{
+	if (self.t_width < time) {
 		sound (self, CHAN_AUTO, "cube/bc_attck.wav", 1, ATTN_NORM);
 		self.t_width = time + 0.4;
 	}
-};
+}
 
 
 /* ------------------------------------------------ */
-/* | Shoot_all - used to traverse linked list to  | */
+/* | bloodcube_shoot_next_target - used to traverse linked list to  | */
 /* | shoot lightning at all visible enemies.      | */
 /* ------------------------------------------------ */
-void() Shoot_all = 
-{
-	if(self.aiment)
-	{
-	   if(self.aiment.health > 0)
-	   if(visible(self.aiment))
-	   {
-		   traceline (self.owner.origin, self.aiment.origin, TRUE, self.owner);
-		   CubeAttack (self.owner.origin, (self.aiment.origin + '0 0 16'), self.owner, self.aiment);
-	   }
-	   self.aiment = self.aiment.aiment;
-	   self.nextthink = time + 0.01;
+void bloodcube_shoot_next_target() {
+	if (self.aiment) {
+		if (self.aiment.health > 0) {
+			if (visible(self.aiment)) {
+				traceline(self.owner.origin, self.aiment.origin, TRUE, self.owner);
+				CubeAttack(self.owner.origin, (self.aiment.origin + '0 0 16'), self.owner, self.aiment);
+			}
+		}
+		self.aiment = self.aiment.aiment;
+		self.nextthink = time + self.delay;
 	}
-	else 
-	   remove(self);
-};
+	else {
+		remove(self);
+	}
+}
 
 /* -------------------------------------------- */
 /* | FeedMe - Looks through linked list and   | */
 /* |  removes all dead entities.  If this is  | */
 /* |  a multiplayer game, give owner a frag.  | */
 /* -------------------------------------------- */
-void() FeedMe =
-{
-local entity	shooter,temp;
+void FeedMe() {
+	entity shooter, temp;
 
 	temp = self;
-	while (self.aiment)
-	{
-	   if(self.aiment.health <= 0)
-	   {
-		self.aiment = self.aiment.aiment;
-		if (deathmatch || coop)
-			temp.owner.frags = temp.owner.frags + 1;
-	   }
-	   self = self.aiment;
+	while (self.aiment) {
+		if(self.aiment.health <= 0) {
+			self.aiment = self.aiment.aiment;
+
+			if (deathmatch || coop) {
+				temp.owner.frags = temp.owner.frags + 1;
+			}
+		}
+		self = self.aiment;
 	}
+
 	self = temp;
-	if (self.aiment == world)
-	{
+	if (!self.aiment) {
 		self.avelocity = '0 100 0';
 		return;
 	}
+
 	shooter = spawn();
+	shooter.classname = "bloodcube_shooter";
 	shooter.aiment = self.aiment;
 	shooter.origin = self.origin;
 	shooter.owner = self;
-	shooter.think = Shoot_all;
-	shooter.nextthink = time + 0.01;
-};
+	shooter.think = bloodcube_shoot_next_target;
+	shooter.delay = 0.01;
+	shooter.nextthink = time + self.delay;
+	shooter.dmg = self.dmg;
+}
 
 void(vector cdest) FeedonPlayer =
 {
@@ -149,42 +155,40 @@ local float		t;
 /* | list of all possible targets.	self.aiment is the | */
 /* | link field.							 | */
 /* ----------------------------------------------------- */
-void() LookforBlood =
-{
-local entity	head;
-local entity	linker;
+void LookforBlood() {
+	entity linker = self;
 
-	linker = self;
-	head = findradius(self.origin, CUBE_RANGE);
-	
-	while (head)
-	{
-		if (head.flags & FL_MONSTER || head.flags & FL_CLIENT)
-		if (head.health > 0 && head != self.owner)
-		{
-		   if (visible(head))
-		   {
-		 	linker.aiment = head;
-			linker = head;
-		   }
+	float target_counter = 0;
+
+	entity head = findradius(self.origin, CUBE_RANGE);
+	while (head) {
+		if (head.flags & FL_MONSTER || head.flags & FL_CLIENT) {
+			if (head.health > 0 && head != self.owner) {
+				if (visible(head)) {
+					linker.aiment = head;
+					linker = head;
+					target_counter += 1;
+				}
+			}
 		}
 		head = head.chain;
 	}
-	if (self.aiment)
-	{
+	linker.aiment = __NULL__;  // make sure to cut the end of the linked list to prevent loops
+
+	// Set the first enemy as the enemy of the blood cube
+	if (self.aiment) {
 		self.enemy = self.aiment;
 		self.avelocity = '0 500 0';
 	}
-};
+}
 
 /* --------------------------------------------------------- */
 /* | blood_CalcMove - Used to calculate the cubes velocity | */
 /* |  to get it to the next position.			     | */
 /* --------------------------------------------------------- */
-void(vector tdest, float tspeed, void() func) blood_CalcMove =
-{
-local vector	vdestdelta;
-local float		len, traveltime;
+void blood_CalcMove(vector tdest, float tspeed, void() func) {
+	vector vdestdelta;
+	float len, traveltime;
 
 	self.finaldest = tdest;
 	self.think = func;
@@ -215,54 +219,48 @@ local float		len, traveltime;
 /* | and also scans the area for enemies.  Also keeps | */
 /* | track of all the timers.	 It's a bit too big.	| */
 /* ---------------------------------------------------- */
-void() Cube_control =
-{
-local vector	cdest;
-local float		clen, cuspeed;
+void Cube_control() {
+	vector cdest;
+	float clen, cuspeed;
 
-	if (self.owner.view_ofs == '0 0 0')
-	{
+	// Check if player dead? Or is this intermission?
+	if (self.owner.view_ofs == '0 0 0') {
 		self.velocity = '0 0 0';
 		self.think = Cube_control;
 		self.nextthink = time + 0.5;
 		return;
 	}
 
-	if (self.cnt == 0)
-		cdest = self.owner.origin + '0 36 52';
-	else if (self.cnt == 1)
-		cdest = self.owner.origin + '25 25 52';
-	else if (self.cnt == 2)
-		cdest = self.owner.origin + '36 0 52';
-	else if (self.cnt == 3)
-		cdest = self.owner.origin + '25 -25 52';
-	else if (self.cnt == 4)
-		cdest = self.owner.origin + '0 -36 52';
-	else if (self.cnt == 5)
-		cdest = self.owner.origin + '-25 -25 52';
-	else if (self.cnt == 6)
-		cdest = self.owner.origin + '-36 0 52';
-	else
-		cdest = self.owner.origin + '-25 25 52';
+	// Pick a position around the player
+	if (self.cnt == 0)      cdest = self.owner.origin + '0 36 52';
+	else if (self.cnt == 1) cdest = self.owner.origin + '25 25 52';
+	else if (self.cnt == 2) cdest = self.owner.origin + '36 0 52';
+	else if (self.cnt == 3) cdest = self.owner.origin + '25 -25 52';
+	else if (self.cnt == 4) cdest = self.owner.origin + '0 -36 52';
+	else if (self.cnt == 5) cdest = self.owner.origin + '-25 -25 52';
+	else if (self.cnt == 6) cdest = self.owner.origin + '-36 0 52';
+	else                    cdest = self.owner.origin + '-25 25 52';
 
 	traceline(self.origin + '0 0 16', cdest, TRUE, self);
 	//dprint(ftos(trace_fraction));dprint(" = trace_fraction\n");
 	if (trace_fraction < 1)
 		cdest = self.owner.origin + '0 0 48';
+
 	traceline(self.origin, cdest + '0 0 32', TRUE, self);
 	if (trace_fraction < 1)
 		cdest = cdest - '0 0 16';
+
 	clen = vlen(cdest - self.origin);
-	if(clen > 500)
-	{
-		//sprint(self.owner, "The BloodCube teleports\n");
+	if (clen > 500) {
+		// Too far from player so teleport to them
 		setorigin (self, (self.owner.origin + '0 0 24'));
 		self.velocity = '0 0 0';
 		self.think = Cube_control;
 		self.nextthink = time + 0.1;
 		return;
 	}
-	if(clen < 50)
+
+	if (clen < 50)
 		cuspeed = clen * 2;
 	else
 		cuspeed = clen * 4;
@@ -272,44 +270,45 @@ local float		clen, cuspeed;
 		self.cnt = 0;
 
 	LookforBlood();	   //dhm: this sets self.aiment if a target is found
-	if(self.aiment != world)
-	 if(self.attack_finished < time)
-	 {
-		FeedMe();
-		self.attack_finished = time + CUBE_ATTACKDELAY;
-	 }
 
-	if(self.invincible_finished < time)
-	 {
+	if (self.aiment) {
+		if(self.attack_finished < time) {
+			FeedMe();
+			self.attack_finished = time + CUBE_ATTACKDELAY;
+		}
+	}
+
+	if (self.invincible_finished < time) {
 		sound(self, CHAN_ITEM, "cube/bc_hngry.wav", 1, ATTN_NORM);
 		self.invincible_finished = time + 30;
-	 }
+	}
 	
-	if(self.invisible_time < time)
+	if (self.invisible_time < time) {
 		FeedonPlayer(cdest);
+	}
 
-	if(self.radsuit_finished < (time+5))
-	 if(self.rad_time < time)
-	 {
-		sound(other, CHAN_AUTO, "cube/bc_activ.wav", 1, ATTN_NORM);
-		stuffcmd(self.owner, "bf\n");
-		sprint(self.owner, "The Sanguinoch grows weary of you\n");
-		self.rad_time = time + 5.5;
-	 }
-	if(self.radsuit_finished < time)
-	{
+	if (self.radsuit_finished < (time+5)) {
+		if(self.rad_time < time) {
+			sound(other, CHAN_AUTO, "cube/bc_activ.wav", 1, ATTN_NORM);
+			stuffcmd(self.owner, "bf\n");
+			sprint(self.owner, "The Sanguinoch grows weary of you\n");
+			self.rad_time = time + 5.5;
+		}
+	}
+
+	if (self.radsuit_finished < time) {
 		sprint(self.owner, "The Sanguinoch has left you\n");
 		Cube_die();
 		return;
 	}
-	if(self.owner.health <= 0)
-	{
+
+	if (self.owner.health <= 0) {
 		Cube_die();
 		return;
 	}
 
 	blood_CalcMove(cdest, cuspeed, Cube_control);
-};
+}
 
 /* ------------------------------------- */
 /* | bloodcb_touch - called when the   | */
@@ -318,35 +317,36 @@ local float		clen, cuspeed;
 /* | centers itself above player until | */
 /* | next call to Control_cube.        | */
 /* ------------------------------------- */
-void() bloodcb_touch =
-{
-	if (self.delay == BLOOD_ASLEEP)
+void bloodcb_touch() {
+	if (self.state == BLOOD_ASLEEP)
 		return;
+
 	if (other.flags & FL_MONSTER)
 		return;
-	if (other.health <= 0 || other.classname != "player")
-	{
-		if (self.delay == BLOOD_AWAKE)
-			self.velocity = ((self.owner.origin + '0 0 48') - self.origin)*2;
+
+	if (other.health <= 0 || other.classname != "player") {
+		if (self.state == BLOOD_AWAKE) {
+			self.velocity = ((self.owner.origin + '0 0 48') - self.origin) * 2;
+		}
+
 		return;
 	}
-	if (other == self.enemy)
-	{
-		if (self.invincible_time < time)
-		{
+
+	if (other == self.enemy) {
+		if (self.invincible_time < time) {
 		   sprint(other, "The Sanguinoch doesn't want you anymore\n");
 		   self.invincible_time = time + 2;
 		}
 		return;
 	}
 
-	if (self.delay == BLOOD_AWAKE)  // already has an owner!
+	if (self.state == BLOOD_AWAKE)  // already has an owner!
 		return;
 
 	self.owner = other;
-	self.delay = BLOOD_AWAKE;	//Cube is in the AWAKE state now
+	self.state = BLOOD_AWAKE;	//Cube is in the AWAKE state now
 	self.cnt = 0;
-	self.radsuit_finished = time + CUBE_GOAWAYTIME;
+	self.radsuit_finished = time + (deathmatch ? CUBE_GOAWAYTIME_DM : CUBE_GOAWAYTIME);
 	self.invincible_finished = time + 12;   //time until hungry sound
 	self.invisible_time = time + 2;
 
@@ -359,7 +359,7 @@ void() bloodcb_touch =
 
 	self.nextthink = time + 0.2;
 	self.think = Cube_control;
-};
+}
 
 void() Cube_stop = 
 {
@@ -396,7 +396,7 @@ local vector 	spot;
 	self.aiment = world;
 	self.owner = world;
 	self.solid = SOLID_NOT;
-	self.delay = BLOOD_ASLEEP;
+	self.state = BLOOD_ASLEEP;
 	self.velocity = '0 0 0';
 	setorigin(self, self.oldorigin);
 	self.mdl = self.model;
@@ -405,9 +405,8 @@ local vector 	spot;
 	self.think = StartCube;
 };
 
-void() StartCube =
-{
-	self.delay = BLOOD_WAIT;
+void StartCube() {
+	self.state = BLOOD_WAIT;
 	self.netname = "BloodCube";
 	setorigin(self, self.origin);
 
@@ -423,7 +422,7 @@ void() StartCube =
 	self.model = self.mdl;
 	setmodel (self, "progs/bloodcb.mdl");
 	setsize (self, '-1 -1 -1', '1 1 1');
-};
+}
 
 
 /* --------------------------------------------------------- */
@@ -431,17 +430,17 @@ void() StartCube =
 New powerup!
 */
 /* --------------------------------------------------------- */
-void() item_bloodcube =
-{
-	if (deathmatch)
-	{
-		CUBE_DAMAGE = CUBE_DAMAGE - 5;
-		CUBE_ATTACKDELAY = 0.25;
-		CUBE_RANGE = CUBE_RANGE - 100;
-		SUB_UseTargets ();
+void item_bloodcube() {
+	self.dmg = CUBE_DAMAGE;
+	self.height = CUBE_RANGE;
+	self.delay = CUBE_ATTACKDELAY;
+
+	if (deathmatch) {
+		self.dmg = CUBE_DAMAGE - 5;
+		self.delay = CUBE_ATTACKDELAY_DM;
+		self.height = CUBE_RANGE - 100;
+		SUB_UseTargets();
 	}
-	else
-		CUBE_GOAWAYTIME = CUBE_GOAWAYTIME + 10;
 
 	self.classname = "BloodCube";
 	self.touch = bloodcb_touch;
@@ -453,17 +452,16 @@ void() item_bloodcube =
 	precache_sound("cube/bc_attck.wav");
 	self.nextthink = time + 0.2;
 	self.think = StartCube;
-};
+}
 
 
 /* ---------------------------------- */
 /* |  Used by flying gibs to guide  | */
 /* |  them into the Bloodcube.      | */
 /* ---------------------------------- */
-void() SeekCube =
-{
-local vector	vdestdelta;
-local float		len, traveltime, addhealth;
+void SeekCube() {
+	vector vdestdelta;
+	float len, traveltime, addhealth;
 
 	if (deathmatch)
 		addhealth = 7;
@@ -477,6 +475,7 @@ local float		len, traveltime, addhealth;
 		self.nextthink = time + 10 * random();
 		return;
 	}
+
 	if(!(visible(self.enemy)))
 	{
 		self.movetype = MOVETYPE_BOUNCE;
@@ -496,7 +495,7 @@ local float		len, traveltime, addhealth;
 			self.enemy.super_time = time + 0.8;
 		}
 		self.enemy.owner.health = self.enemy.owner.health + addhealth;
-		stuffcmd (self.enemy.owner, "bf\n");
+		stuffcmd(self.enemy.owner, "bf\n");
 		remove(self);
 		return;
 	}
