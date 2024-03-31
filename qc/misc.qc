@@ -222,9 +222,9 @@ void() fire_use =
 		remove(self);
 };
 
-void() TossGibs =
-{
-local entity	gib1, gib2, ghead, cube;
+float bloodcube_is_awake(entity);
+void TossGibs() {
+	entity gib1, gib2, ghead, cube;
 
         gib1 = spawn();
         gib1.solid = SOLID_TRIGGER;
@@ -244,7 +244,7 @@ local entity	gib1, gib2, ghead, cube;
   	  cube = find(world, classname, "BloodCube");
 	  while(cube != world)
 	  {
-	    if (cube.delay == 1)
+	    if (bloodcube_is_awake(cube))
 	 	if (visible(cube))
 	 	{
 			gib1.movetype = MOVETYPE_FLY;
@@ -275,7 +275,7 @@ local entity	gib1, gib2, ghead, cube;
   	  cube = find(world, classname, "BloodCube");
 	  while(cube != world)
 	  {
-	    if (cube.delay == 1)
+	    if (bloodcube_is_awake(cube))
 	 	if (visible(cube))
 	 	{
 			gib2.movetype = MOVETYPE_FLY;
@@ -306,7 +306,7 @@ local entity	gib1, gib2, ghead, cube;
   	  cube = find(world, classname, "BloodCube");
 	  while(cube != world)
 	  {
-	    if (cube.delay == 1)
+	    if (bloodcube_is_awake(cube))
 	 	if (visible(cube))
 	 	{
 			ghead.movetype = MOVETYPE_FLY;
@@ -369,7 +369,7 @@ local float	randmn;
 		cube = find(world, classname, "BloodCube");
 		while(cube != world)
 		{
-		    if (cube.delay == 1)
+		    if (cube.wait == 1)
 		 	if (visible(cube))
 		 	{
 				fireball.movetype = MOVETYPE_FLY;

@@ -168,8 +168,7 @@ visible
 returns 1 if the entity is visible to self, even if not infront ()
 =============
 */
-float (entity targ) visible =
-{
+float visible(entity targ) {
 	local vector	spot1, spot2;
 	
 	spot1 = self.origin + self.view_ofs;
@@ -182,7 +181,7 @@ float (entity targ) visible =
 	if (trace_fraction == 1)
 		return TRUE;
 	return FALSE;
-};
+}
 
 
 /*

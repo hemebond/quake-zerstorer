@@ -772,6 +772,8 @@ vector(float dm, vector dir) VelocityForDamage =
 /* |  and it looks for the BloodCube   | */
 /* |  to see if it needs to fly at it. | */
 /* ------------------------------------- */
+float bloodcube_is_awake(entity);
+
 void(string gibname, float dm, vector dir) ThrowGib =
 {
 	local	entity new,cube;
@@ -796,7 +798,7 @@ void(string gibname, float dm, vector dir) ThrowGib =
 	cube = find(world, classname, "BloodCube");
 	while(cube != world)
 	{
-		if (cube.delay == 1)
+		if (bloodcube_is_awake(cube))
 		 if (visible(cube))
 		 {
 			new.movetype = MOVETYPE_FLY;
