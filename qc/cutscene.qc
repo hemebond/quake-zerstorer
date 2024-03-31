@@ -632,38 +632,37 @@ This will change the gravity for objects that are inside it.
 Put the value to change gravity to in the "gravity" field.
 Ziggurat Vertigo used '100' for its low gravity.
 */
-void() gravity_use =
-{
+void gravity_use() {
 	if (self.cnt == -1)
 	{
-		//dprint("Anti-gravity machine turned ON\n");
+		// dprint("Anti-gravity machine turned ON\n");
 		self.cnt = 0;
 	}
 	else
 	{
-		//dprint("Anti-gravity machine turned OFF\n");
+		// dprint("Anti-gravity machine turned OFF\n");
 		self.cnt = -1;
 	}
-};
+}
 
-void() gravity_touch =
-{
+void gravity_touch() {
 	if(self.cnt == -1)
 		return;
-	if(other.deadflag < 2)
-	if(other.velocity_z != 0)
-	if(other.movetype != MOVETYPE_FLYMISSILE)
-	if(other.classname != "BloodCube")
-		other.velocity_z = other.velocity_z + (self.delay * frametime);
-};
 
-void() trigger_gravity = 
-{
-local float	worldGravity;
+	if(other.deadflag < 2) {
+		if(other.movetype != MOVETYPE_FLYMISSILE) {
+			if(other.classname != "BloodCube") {
+				other.velocity_z = other.velocity_z * self.delay;
+			}
+		}
+	}
+}
 
+void trigger_gravity() {
 	InitTrigger ();
-	worldGravity = cvar("sv_gravity");
-	self.delay = worldGravity - self.gravity;
+
+	float worldGravity = cvar("sv_gravity");
+	self.delay = self.gravity / worldGravity;
 	self.touch = gravity_touch;
 
 	if(self.targetname)
@@ -671,7 +670,7 @@ local float	worldGravity;
 		self.cnt = -1;
 		self.use = gravity_use;
 	}
-};
+}
 
 
 /* ------------------------------ */

@@ -264,7 +264,7 @@ void() train_use =
 		if (self.delay)
 		{
 			self.think = train_next;
-			self.nextthink = time + self.delay;
+			self.nextthink = self.nextthink + self.delay;
 			return;
 		}
 		train_next();

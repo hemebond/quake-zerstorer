@@ -33,8 +33,7 @@ PlaceItem
 plants the object on the floor
 ============
 */
-void() PlaceItem =
-{
+void PlaceItem() {
 	local float	oldz;
 
 	self.mdl = self.model;		// so it can be restored on respawn
@@ -67,8 +66,7 @@ StartItem
 Sets the clipping size and plants the object on the floor
 ============
 */
-void() StartItem =
-{
+void StartItem() {
 	self.nextthink = time + 0.2;	// items start after other solids
 	self.think = PlaceItem;
 };
@@ -1058,8 +1056,7 @@ following:
 2: base
 */
 
-void() item_key1 =
-{
+void item_key1() {
 	if (world.worldtype == 0)
 	{
 		precache_model ("progs/w_s_key.mdl");

@@ -366,14 +366,12 @@ void()	hknight_watk22	=[	$w_attack22,	hknight_run1	] {ai_charge(3);};
 
 //============================================================================
 
-void() hk_idle_sound =
-{
+void hk_idle_sound() {
 	if (random() < 0.2)
 		sound (self, CHAN_VOICE, "hknight/idle.wav", 1, ATTN_NORM);
-};
+}
 
-void(entity attacker, float damage)	hknight_pain =
-{
+void hknight_pain(entity attacker, float damage) {
 	if (self.pain_finished > time)
 		return;
 
@@ -391,12 +389,11 @@ void(entity attacker, float damage)	hknight_pain =
 
 	self.pain_finished = time + 1;
 	hknight_pain1 ();
-};
+}
 
 float	hknight_type;
 
-void() hknight_melee =
-{
+void hknight_melee() {
 	hknight_type = hknight_type + 1;
 
 	sound (self, CHAN_WEAPON, "hknight/slash1.wav", 1, ATTN_NORM);
@@ -409,20 +406,19 @@ void() hknight_melee =
 		hknight_watk1 ();
 		hknight_type = 0;
 	}
-};
+}
 
-void() hknight_use =   // bring statue to life
-{
-        walkmonster_start();
-        
-        ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble2.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble3.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble2.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble3.mdl", self.health, self.dest);
-        ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
-        sound (self, CHAN_VOICE, "weapons/r_exp3.wav", 1, ATTN_NORM); 
+void hknight_use() {   // bring statue to life
+	walkmonster_start();
+
+	ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble2.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble3.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble2.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble3.mdl", self.health, self.dest);
+	ThrowRubble ("progs/rubble1.mdl", self.health, self.dest);
+	sound (self, CHAN_VOICE, "weapons/r_exp3.wav", 1, ATTN_NORM);
 
 	  self.wait = 0;
         self.skin = 0;
@@ -456,33 +452,32 @@ local entity	teldeath;
 	self.health = 250;
 
 	walkmonster_start();
-};
+}
 
 /*QUAKED monster_hell_knight (1 0 0) (-16 -16 -24) (16 16 40) Ambush
 */
-void() monster_hell_knight =
-{
+void monster_hell_knight() {
 	if (deathmatch)
 	{
 		remove(self);
 		return;
 	}
-	precache_model2 ("progs/hknight.mdl");
-	precache_model2 ("progs/k_spike.mdl");
-	precache_model2 ("progs/h_hellkn.mdl");
 
+	precache_model2("progs/hknight.mdl");
+	precache_model2("progs/k_spike.mdl");
+	precache_model2("progs/h_hellkn.mdl");
 	
-	precache_sound2 ("hknight/attack1.wav");
-	precache_sound2 ("hknight/death1.wav");
-	precache_sound2 ("hknight/pain1.wav");
-	precache_sound2 ("hknight/sight1.wav");
-	precache_sound ("hknight/hit.wav");		// used by C code, so don't sound2
-	precache_sound2 ("hknight/slash1.wav");
-	precache_sound2 ("hknight/idle.wav");
-	precache_sound2 ("hknight/grunt.wav");
+	precache_sound2("hknight/attack1.wav");
+	precache_sound2("hknight/death1.wav");
+	precache_sound2("hknight/pain1.wav");
+	precache_sound2("hknight/sight1.wav");
+	precache_sound("hknight/hit.wav");		// used by C code, so don't sound2
+	precache_sound2("hknight/slash1.wav");
+	precache_sound2("hknight/idle.wav");
+	precache_sound2("hknight/grunt.wav");
 
-	precache_sound ("knight/sword1.wav");
-	precache_sound ("knight/sword2.wav");
+	precache_sound("knight/sword1.wav");
+	precache_sound("knight/sword2.wav");
 
         // precache rubble models for hknight statues
 	precache_model("progs/rubble1.mdl");
@@ -512,20 +507,20 @@ void() monster_hell_knight =
 	setsize (self, '-16 -16 -24', '16 16 40');
 	self.health = 250;
 
-      if (self.spawnflags & SPAWN_STATUE)
+	if (self.spawnflags & SPAWN_STATUE)
 	{
-	      self.use = hknight_use;
+		self.use = hknight_use;
 		self.skin = 1;
 		self.wait = 1;
 		hknight_statue_stand1 ();
 	}
-      else if (self.spawnflags & SPAWN_ALT_STATUE)
+	else if (self.spawnflags & SPAWN_ALT_STATUE)
 	{
-	      self.use = hknight_use;
+		self.use = hknight_use;
 		self.skin = 1;
 		self.wait = 1;
 		hknight_statue_stand2 ();
 	}
-      else
-            walkmonster_start ();
-};
+	else
+		walkmonster_start ();
+}

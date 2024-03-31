@@ -139,22 +139,27 @@ void wall_pain(entity attacker, float damage) {
 		self.health = self.max_health;
 };
 
-void() wall_use =
-{
+void wall_use() {
+	if (self.delay) {
+		self.think = wall_use;
+		self.nextthink = self.nextthink + self.delay;
+		self.delay = 0;
+		return;
+	}
+
 	self.health = -100;
 	self.dest_x = (random() * 10) - 5;
 	self.dest_y = (random() * 10) - 5;
 	self.dest_z = (random() * 10);
 	wall_killed();
-};
+}
 
 /*QUAKED exploding_wall
 When the exploding wall is shot, it "gibs" into rubble.
 "target"	all entities with a matching targetname will be used when killed
 "health"	the amount of damage needed to destroy the wall instead of touched
 */
-void() exploding_wall =
-{
+void exploding_wall() {
 	setmodel (self, self.model);
 	// precache rubble models
 	if (self.spawnflags & SPAWN_GLASS)
@@ -169,25 +174,26 @@ void() exploding_wall =
 		precache_sound("ambience/brik_hit.wav");
 		precache_sound("ambience/brikhit2.wav");
 	}
-	self.solid = SOLID_BBOX;
-	self.movetype = MOVETYPE_NONE;
+
+	self.movetype = MOVETYPE_PUSH;  // so it doesn't get pushed by anything
+	self.solid = SOLID_BSP;
 
 	if (self.health)
 	{
 		self.max_health = self.health;
-		self.th_die = wall_killed;
-		self.takedamage = DAMAGE_YES;
 	}
 	else
 	{
 		self.max_health = 100;
-		self.th_die = wall_killed;
-		self.takedamage = DAMAGE_YES;
 	}
+
+	self.th_die = wall_killed;
+	self.takedamage = DAMAGE_YES;
 	self.th_pain = wall_pain;
+
 	if (self.targetname)
 	{
 		self.use = wall_use;
 		self.max_health = 10000;
 	}
-};
+}

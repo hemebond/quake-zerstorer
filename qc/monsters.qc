@@ -81,14 +81,16 @@ void() walkmonster_start_go =
 local string	stemp;
 local entity	etemp;
 
+	self.flags = self.flags | FL_MONSTER;  // set the monster flag so that it's spawned in monster are affected by triggers
+
 	self.origin_z = self.origin_z + 1;	// raise off floor a bit
 	droptofloor();
 	
 	if (!walkmove(0,0))
 	{
-		// dprint ("walkmonster in wall at: ");
-		// dprint (vtos(self.origin));
-		dprint (" ");
+		dprint ("walkmonster in wall at: ");
+		dprint (vtos(self.origin));
+		dprint ("\n");
 	}
 	
 	self.takedamage = DAMAGE_AIM;
@@ -98,8 +100,6 @@ local entity	etemp;
 		self.yaw_speed = 20;
 	self.view_ofs = '0 0 25';
 	self.use = monster_use;
-	
-	self.flags = self.flags | FL_MONSTER;
 	
 	if (self.target)
 	{
